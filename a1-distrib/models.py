@@ -26,12 +26,46 @@ class FeatureExtractor(object):
 
 
 class UnigramFeatureExtractor(FeatureExtractor):
-    """ TODO:
+    """ TODO: add comments
     Extracts unigram bag-of-words features from a sentence. It's up to you to decide how you want to handle counts
     and any additional preprocessing you want to do.
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+
+    def get_indexer(self) -> Indexer:
+        """
+        Get Indexer for this feature extractor object.
+        """
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool=False) -> Counter:
+        print(sentence) # TODO: delete
+
+        # Process sentence and update featurizer and feature vector.
+        feat_vect = Counter()
+        for word in sentence.words:
+            # Process all words as lowercase.
+            lower_word = word.lower()
+
+            # If add_to_indexer is True, grow dimensionality of Indexer (featurizer).
+            if add_to_indexer:
+                index = self.indexer.add_and_get_index(lower_word)
+            else:
+                index = self.indexer.index_of(lower_word)
+
+            #print(f'{lower_word}, {index}') TODO: delete later
+
+            # With Counter (feature vector), count the frequency of each word in sentence.
+            feat_vect[lower_word] += 1
+            print(f'{lower_word}, {feat_vect[lower_word]}')
+
+        # TODO: throw out stopwords?
+        
+        
+        # If not add_to_indexer, throw out words that aren't present in featurizer.
+        # Return feature vector.
+        
 
 
 class BigramFeatureExtractor(FeatureExtractor):
@@ -97,7 +131,9 @@ def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureE
     :param feat_extractor: feature extractor to use
     :return: trained PerceptronClassifier model
     """
-    raise Exception("Must be implemented")
+    # TODO: delete later
+    for ex in train_exs:
+        feat_extractor.extract_features(ex, True)
 
 
 def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor: FeatureExtractor) -> LogisticRegressionClassifier:
