@@ -1,7 +1,6 @@
 # models.py
 
 import numpy as np
-import random
 
 from sentiment_data import *
 from utils import *
@@ -68,11 +67,42 @@ class UnigramFeatureExtractor(FeatureExtractor):
 
 
 class BigramFeatureExtractor(FeatureExtractor):
-    """ TODO:
+    """ TODO: add comments
     Bigram feature extractor analogous to the unigram one.
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+
+    def get_indexer(self) -> Indexer:
+        """
+        Get Indexer for this feature extractor object.
+        """
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool=False) -> Counter:
+        # Process sentence and update featurizer and feature vector.
+        feat_vect = Counter()
+        for i in range(0, len(sentence) - 1):
+            # Process all words as lowercase.
+            word_1 = sentence[i].lower()
+            word_2 = sentence[i + 1].lower()
+            bigram = (word_1, word_2)
+
+            # If add_to_indexer is True, grow dimensionality of Indexer (featurizer).
+            if add_to_indexer:
+                index = self.indexer.add_and_get_index(bigram)
+            else:
+                index = self.indexer.index_of(bigram)
+
+            # With Counter (feature vector), count the frequency of each bigram in sentence.
+            # If not add_to_indexer, throw out bigrams that aren't present in featurizer.
+            if index != -1:
+                feat_vect[index] += 1
+
+        # TODO: throw out stopwords?
+        
+        # Return feature vector.
+        return feat_vect
 
 
 class BetterFeatureExtractor(FeatureExtractor):
@@ -109,9 +139,10 @@ class PerceptronClassifier(SentimentClassifier):
     superclass. Hint: you'll probably need this class to wrap both the weight vector and featurizer -- feel free to
     modify the constructor to pass these in.
     """
-    def __init__(self, indexer: Indexer):
-        self.indexer = indexer
-        self.weights = np.zeros(len(indexer)) # Initialize all weights as 0.
+    def __init__(self, feat_extractor: FeatureExtractor):
+        self.indexer = feat_extractor.get_indexer()
+        self.weights = np.zeros(len(self.indexer)) # Initialize all weights as 0.
+        self.feat_extractor = feat_extractor
 
     def get_indexer(self) -> Indexer:
         return self.indexer
@@ -123,10 +154,8 @@ class PerceptronClassifier(SentimentClassifier):
         self.weights = new_weights
 
     def predict(self, sentence: List[str]) -> int:
-        #TODO: write
-
         # Get feature vector for given sentence.
-        featurizer = UnigramFeatureExtractor(self.indexer)
+        featurizer = self.feat_extractor
         feat_vect = featurizer.extract_features(sentence, False)
         
         # Compute score of sentence (dot product of weight vector and feature vector frequencies).
@@ -138,13 +167,38 @@ class PerceptronClassifier(SentimentClassifier):
 
 
 class LogisticRegressionClassifier(SentimentClassifier):
-    """ TODO:
+    """ TODO: add comments
     Implement this class -- you should at least have init() and implement the predict method from the SentimentClassifier
     superclass. Hint: you'll probably need this class to wrap both the weight vector and featurizer -- feel free to
     modify the constructor to pass these in.
     """
-    def __init__(self):
-        raise Exception("Must be implemented")
+    def __init__(self, feat_extractor: FeatureExtractor):
+        self.indexer = feat_extractor.get_indexer()
+        self.weights = np.zeros(len(self.indexer)) # Initialize all weights as 0.
+        self.feat_extractor = feat_extractor
+
+    def get_indexer(self) -> Indexer:
+        return self.indexer
+    
+    def get_weights(self) -> np.array:
+        return self.weights
+
+    def set_weights(self, new_weights: np.array):
+        self.weights = new_weights
+
+    def predict(self, sentence: List[str]) -> int:
+        # Get feature vector for given sentence.
+        featurizer = self.feat_extractor
+        feat_vect = featurizer.extract_features(sentence, False)
+        
+        # Compute probability of sentence for positive class.
+        weights_rel = self.weights[list(feat_vect.keys())]
+        dot_product = np.dot(list(feat_vect.values()), weights_rel)
+        e_exp = np.exp(dot_product)
+        pos_prob = (e_exp) / (1 + e_exp)
+
+        # Check for correct prediction.
+        return 1 if pos_prob > 0.5 else 0
 
 
 def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureExtractor) -> PerceptronClassifier:
@@ -161,18 +215,18 @@ def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureE
         
     # Initialize new perceptron model.
     featurizer = feat_extractor.get_indexer()
-    per_model = PerceptronClassifier(featurizer)
+    per_model = PerceptronClassifier(feat_extractor)
 
     # Learn from each example to train perceptron.
     # TODO: try with set number of epochs vs. convergence
     weights = per_model.get_weights()
-    for t in range(0, 100): # TODO: adjust
+    for t in range(0, 25): # TODO: adjust
         step_size = 1 / (t + 1)
 
         # Shuffle examples each epoch.
-        random.seed(27)
+        np.random.seed(27)
         indices = list(range(0, len(train_exs)))
-        random.shuffle(indices)
+        np.random.shuffle(indices)
 
         # Update perceptron for each training example.
         for i in indices:
@@ -206,13 +260,60 @@ def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureE
 
 
 def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor: FeatureExtractor) -> LogisticRegressionClassifier:
-    """ TODO:
+    """ TODO: add comments
     Train a logistic regression model.
     :param train_exs: training set, List of SentimentExample objects
     :param feat_extractor: feature extractor to use
     :return: trained LogisticRegressionClassifier model
     """
-    raise Exception("Must be implemented")
+    # Get vocabulary and all feature vectors.
+    vects = list()
+    for ex in train_exs:
+        vects.append(feat_extractor.extract_features(ex.words, True))
+        
+    # Initialize new logistic regression model.
+    featurizer = feat_extractor.get_indexer()
+    log_model = LogisticRegressionClassifier(feat_extractor)
+
+    # Learn from each example to train logistic regression model.
+    # TODO: try with set number of epochs vs. convergence
+    weights = log_model.get_weights()
+    for t in range(0, 25): # TODO: adjust
+        step_size = 1 / (t + 1)
+
+        # Shuffle examples each epoch.
+        np.random.seed(27)
+        indices = list(range(0, len(train_exs)))
+        np.random.shuffle(indices)
+
+        # Update perceptron for each training example.
+        for i in indices:
+            # Get feature vector.
+            feat_vect = vects[i]
+
+            # Compute probability of sentence for positive class.
+            weights_rel = weights[list(feat_vect.keys())]
+            dot_product = np.dot(list(feat_vect.values()), weights_rel)
+            e_exp = np.exp(dot_product)
+            pos_prob = (e_exp) / (1 + e_exp)
+
+            # Update weights based on true class label.
+            y_true = train_exs[i].label
+            update_feats = step_size * np.array(list(feat_vect.values()))
+
+            if y_true == 1:
+                # Need to increase weight.
+                update_vals = update_feats * (1 - pos_prob)
+                weights_rel = np.add(weights_rel, update_vals)
+            else:
+                # Need to decrease weight.
+                update_vals = update_feats * pos_prob
+                weights_rel = np.subtract(weights_rel, update_vals)
+            
+            # Update model with learned weights.
+            weights[list(feat_vect.keys())] = weights_rel
+        log_model.set_weights(weights)
+    return log_model
 
 
 def train_model(args, train_exs: List[SentimentExample], dev_exs: List[SentimentExample]) -> SentimentClassifier:
