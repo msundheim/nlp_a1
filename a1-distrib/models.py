@@ -1,6 +1,8 @@
 # models.py
 
 import numpy as np
+import nltk
+from nltk.corpus import stopwords
 
 from sentiment_data import *
 from utils import *
@@ -106,11 +108,53 @@ class BigramFeatureExtractor(FeatureExtractor):
 
 
 class BetterFeatureExtractor(FeatureExtractor):
-    """ TODO:
+    """ TODO: add comments
     Better feature extractor...try whatever you can think of!
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+        self.word_freq = Counter() # Contains overall word frequency in training corpus.
+
+        # Get English stopwords.
+        nltk.download('stopwords')
+        self.stopwords = stopwords.words('english')
+
+    def get_indexer(self) -> Indexer:
+        """
+        Get Indexer for this feature extractor object.
+        """
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool=False) -> Counter:
+        # Process sentence and update featurizer and feature vector.
+        feat_vect = Counter()
+        for word in sentence:
+            # Process all words as lowercase.
+            lower_word = word.lower()
+
+            if lower_word not in self.stopwords:
+                # If add_to_indexer is True, grow dimensionality of Indexer (featurizer).
+                if add_to_indexer:
+                    index = self.indexer.add_and_get_index(lower_word)
+                else:
+                    index = self.indexer.index_of(lower_word)
+
+                # With Counter (feature vector), update earliest position of word in sentence.
+                # If not add_to_indexer, throw out words that aren't present in featurizer.
+                if index != -1:
+                    feat_vect[index] += 1
+
+        # Return feature vector.
+        return feat_vect
+
+    def remove_common_features(self, num_ex: int, feat_vect: Counter) -> Counter:
+        new_vect = feat_vect.copy()
+        for key in feat_vect.keys()
+            if feat_vect[key] > (num_ex / 2):
+                new_vect.pop(key)
+
+        return new_vect
+
 
 
 class SentimentClassifier(object):
