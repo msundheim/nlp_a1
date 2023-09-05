@@ -106,11 +106,94 @@ class BigramFeatureExtractor(FeatureExtractor):
 
 
 class BetterFeatureExtractor(FeatureExtractor):
-    """ TODO:
+    """ TODO: add comments
     Better feature extractor...try whatever you can think of!
     """
     def __init__(self, indexer: Indexer):
-        raise Exception("Must be implemented")
+        self.indexer = indexer
+        self.word_in_sent = Counter()
+        self.num_sentences = 0
+        self.idf_table = dict()
+
+    def get_indexer(self) -> Indexer:
+        """
+        Get Indexer for this feature extractor object.
+        """
+        return self.indexer
+
+    def extract_features(self, sentence: List[str], add_to_indexer: bool=False) -> Counter:
+        # Process sentence and update featurizer and feature vector.
+        feat_vect = Counter()
+        for word in sentence:
+            # Process all words as lowercase.
+            lower_word = word.lower()
+
+            # If add_to_indexer is True, grow dimensionality of Indexer (featurizer).
+            if add_to_indexer:
+                index = self.indexer.add_and_get_index(lower_word)
+            else:
+                index = self.indexer.index_of(lower_word)
+
+            # With Counter (feature vector), count the frequency of each word in sentence.
+            # If not add_to_indexer, throw out words that aren't present in featurizer.
+            if index != -1:
+                feat_vect[index] += 1
+
+        # TODO: throw out stopwords?
+        
+        # Return feature vector.
+        return feat_vect
+
+    def calc_tf(self, sentence: List[str]) -> dict:
+        """
+        Calculate the term frequency for each word in a given sentence.
+        """
+        word_freq = Counter()
+        word_tf = dict()
+
+        # Calculate word frequency for given sentence.
+        for word in sentence:
+            # Process all words as lowercase.
+            lower_word = word.lower()
+            index = self.indexer.index_of(lower_word)
+            
+            if index != -1:
+                word_freq[index] += 1
+
+                # Update term frequency for word.
+                tf = word_freq[index] / len(sentence)
+                word_tf[index] = tf
+
+        return word_tf
+
+    def calc_idf(self, train_exs: List[SentimentExample]):
+        """
+        Calculate inverse document frequency for each word in training examples.
+        """
+        self.num_sentences = len(train_exs)
+        for ex in train_exs:
+            for word in set(ex.words):
+                # Process all words as lowercase.
+                lower_word = word.lower()
+                index = self.indexer.index_of(lower_word)
+
+                if index != -1:
+                    # Update inverse word frequency for word.
+                    self.word_in_sent[index] += 1
+                    idf = np.log(self.num_sentences / self.word_in_sent[index])
+                    self.idf_table[index] = idf
+
+    def calc_tf_idf(self, tf_table: dict) -> dict:
+        """
+        Calculate the term frequency - inverse document frequency of each word in a sentence.
+        """
+        tf_idf_table = dict()
+        for index in tf_table.keys():
+            tf = tf_table[index]
+            idf = self.idf_table[index]
+            tf_idf_table[index] = tf * idf
+        
+        return tf_idf_table
 
 
 class SentimentClassifier(object):
@@ -157,6 +240,16 @@ class PerceptronClassifier(SentimentClassifier):
         # Get feature vector for given sentence.
         featurizer = self.feat_extractor
         feat_vect = featurizer.extract_features(sentence, False)
+
+        if isinstance(self.feat_extractor, BetterFeatureExtractor):
+            tf_table = self.feat_extractor.calc_tf(sentence)
+            tf_idf_table = self.feat_extractor.calc_tf_idf(tf_table)
+            
+            new_vect = Counter()
+            for index in feat_vect.keys():
+                new_vect[index] = tf_idf_table[index]
+            
+            feat_vect = new_vect
         
         # Compute score of sentence (dot product of weight vector and feature vector frequencies).
         weights_rel = self.weights[list(feat_vect.keys())]
@@ -190,6 +283,16 @@ class LogisticRegressionClassifier(SentimentClassifier):
         # Get feature vector for given sentence.
         featurizer = self.feat_extractor
         feat_vect = featurizer.extract_features(sentence, False)
+
+        if isinstance(self.feat_extractor, BetterFeatureExtractor):
+            tf_table = self.feat_extractor.calc_tf(sentence)
+            tf_idf_table = self.feat_extractor.calc_tf_idf(tf_table)
+            
+            new_vect = Counter()
+            for index in feat_vect.keys():
+                new_vect[index] = tf_idf_table[index]
+            
+            feat_vect = new_vect
         
         # Compute probability of sentence for positive class.
         weights_rel = self.weights[list(feat_vect.keys())]
@@ -212,6 +315,22 @@ def train_perceptron(train_exs: List[SentimentExample], feat_extractor: FeatureE
     vects = list()
     for ex in train_exs:
         vects.append(feat_extractor.extract_features(ex.words, True))
+    
+    if isinstance(feat_extractor, BetterFeatureExtractor):
+        feat_extractor.calc_idf(train_exs)
+
+        for i in range(0, len(train_exs)):
+            tf_table = feat_extractor.calc_tf(train_exs[i].words)
+            tf_idf_table = feat_extractor.calc_tf_idf(tf_table)
+
+            # Get feature vector.
+            feat_vect = vects[i]
+            
+            new_vect = Counter()
+            for index in feat_vect.keys():
+                new_vect[index] = tf_idf_table[index]
+            
+            vects[i] = new_vect
         
     # Initialize new perceptron model.
     featurizer = feat_extractor.get_indexer()
@@ -270,6 +389,22 @@ def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor:
     vects = list()
     for ex in train_exs:
         vects.append(feat_extractor.extract_features(ex.words, True))
+
+    if isinstance(feat_extractor, BetterFeatureExtractor):
+        feat_extractor.calc_idf(train_exs)
+
+        for i in range(0, len(train_exs)):
+            tf_table = feat_extractor.calc_tf(train_exs[i].words)
+            tf_idf_table = feat_extractor.calc_tf_idf(tf_table)
+
+            # Get feature vector.
+            feat_vect = vects[i]
+            
+            new_vect = Counter()
+            for index in feat_vect.keys():
+                new_vect[index] = tf_idf_table[index]
+            
+            vects[i] = new_vect
         
     # Initialize new logistic regression model.
     featurizer = feat_extractor.get_indexer()
