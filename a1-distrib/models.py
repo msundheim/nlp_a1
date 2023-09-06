@@ -2,7 +2,10 @@
 
 # Modules imported by Megan Sundheim.
 import numpy as np
+"""
+# For Q6 plotting.
 import matplotlib.pyplot as plt
+"""
 
 from sentiment_data import *
 from utils import *
@@ -555,11 +558,12 @@ def train_logistic_regression(train_exs: List[SentimentExample], feat_extractor:
     return log_model
 
 
+"""
 def train_log_reg_plot(train_exs: List[SentimentExample], dev_exs: List[SentimentExample], feat_extractor: FeatureExtractor, epochs: int=25) -> LogisticRegressionClassifier:
-    """
-    For Q6, plot the training objective, dataset log likelihood, and dev accuracy vs. 
-    number of training iterations for several step sizes.
-    """
+    
+    # For Q6, plot the training objective, dataset log likelihood, and dev accuracy vs. 
+    # number of training iterations for several step sizes.
+
     # Initialize subplots.
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
     ax1.set_title("Number of Training Iterations vs. Dataset Log Likelihood")
@@ -681,6 +685,7 @@ def train_log_reg_plot(train_exs: List[SentimentExample], dev_exs: List[Sentimen
     fig.savefig("q6_plots.png")
     
     return log_model
+"""
 
 
 def train_model(args, train_exs: List[SentimentExample], dev_exs: List[SentimentExample]) -> SentimentClassifier:
