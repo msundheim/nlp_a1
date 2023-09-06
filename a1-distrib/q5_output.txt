@@ -1,0 +1,9 @@
+Namespace(model='LR', feats='UNIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6884 / 6920 = 0.994798
+Precision (fraction of predicted positives that are correct): 3586 / 3598 = 0.996665; Recall (fraction of true positives predicted correctly): 3586 / 3610 = 0.993352; F1 (harmonic mean of precision and recall): 0.995006
+=====Dev Accuracy=====
+Accuracy: 682 / 872 = 0.782110
+Precision (fraction of predicted positives that are correct): 362 / 470 = 0.770213; Recall (fraction of true positives predicted correctly): 362 / 444 = 0.815315; F1 (harmonic mean of precision and recall): 0.792123
+Time for training and evaluation: 2.73 seconds

@@ -6,4 +6,4 @@ Precision (fraction of predicted positives that are correct): 3604 / 3634 = 0.99
 =====Dev Accuracy=====
 Accuracy: 669 / 872 = 0.767202
 Precision (fraction of predicted positives that are correct): 356 / 471 = 0.755839; Recall (fraction of true positives predicted correctly): 356 / 444 = 0.801802; F1 (harmonic mean of precision and recall): 0.778142
-Time for training and evaluation: 1.06 seconds
+Time for training and evaluation: 1.22 seconds

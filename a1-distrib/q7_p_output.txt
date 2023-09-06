@@ -1,0 +1,9 @@
+Namespace(model='PERCEPTRON', feats='BIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6920 / 6920 = 1.000000
+Precision (fraction of predicted positives that are correct): 3610 / 3610 = 1.000000; Recall (fraction of true positives predicted correctly): 3610 / 3610 = 1.000000; F1 (harmonic mean of precision and recall): 1.000000
+=====Dev Accuracy=====
+Accuracy: 625 / 872 = 0.716743
+Precision (fraction of predicted positives that are correct): 330 / 463 = 0.712743; Recall (fraction of true positives predicted correctly): 330 / 444 = 0.743243; F1 (harmonic mean of precision and recall): 0.727674
+Time for training and evaluation: 1.49 seconds

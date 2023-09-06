@@ -1,0 +1,9 @@
+Namespace(model='LR', feats='BIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6920 / 6920 = 1.000000
+Precision (fraction of predicted positives that are correct): 3610 / 3610 = 1.000000; Recall (fraction of true positives predicted correctly): 3610 / 3610 = 1.000000; F1 (harmonic mean of precision and recall): 1.000000
+=====Dev Accuracy=====
+Accuracy: 630 / 872 = 0.722477
+Precision (fraction of predicted positives that are correct): 337 / 472 = 0.713983; Recall (fraction of true positives predicted correctly): 337 / 444 = 0.759009; F1 (harmonic mean of precision and recall): 0.735808
+Time for training and evaluation: 2.84 seconds

@@ -1,0 +1,9 @@
+Namespace(model='LR', feats='BETTER', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6755 / 6920 = 0.976156
+Precision (fraction of predicted positives that are correct): 3512 / 3579 = 0.981280; Recall (fraction of true positives predicted correctly): 3512 / 3610 = 0.972853; F1 (harmonic mean of precision and recall): 0.977048
+=====Dev Accuracy=====
+Accuracy: 683 / 872 = 0.783257
+Precision (fraction of predicted positives that are correct): 361 / 467 = 0.773019; Recall (fraction of true positives predicted correctly): 361 / 444 = 0.813063; F1 (harmonic mean of precision and recall): 0.792536
+Time for training and evaluation: 2.75 seconds

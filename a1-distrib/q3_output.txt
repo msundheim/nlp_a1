@@ -1,9 +1,34 @@
 Namespace(model='PERCEPTRON', feats='UNIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
 6920 / 872 / 1821 train/dev/test examples
+
+Highest positive weights:
+refreshing: 8.051190476190477
+manages: 7.894444444444444
+enjoyable: 7.616666666666666
+eyes: 7.466666666666666
+solid: 7.25
+terrific: 7.083333333333333
+road: 7.033333333333333
+remarkable: 6.75
+wonderful: 6.591666666666667
+hilarious: 6.583333333333333
+
+Lowest negative weights:
+barely: -8.383333333333335
+suffers: -7.75
+none: -7.617156862745098
+unfortunately: -7.5
+worst: -7.434041822246496
+tiresome: -7.25
+flat: -7.210793650793651
+starts: -7.123015873015873
+stupid: -7.115613553113553
+repetitive: -7.0
+
 =====Train Accuracy=====
 Accuracy: 6884 / 6920 = 0.994798
 Precision (fraction of predicted positives that are correct): 3604 / 3634 = 0.991745; Recall (fraction of true positives predicted correctly): 3604 / 3610 = 0.998338; F1 (harmonic mean of precision and recall): 0.995030
 =====Dev Accuracy=====
 Accuracy: 669 / 872 = 0.767202
 Precision (fraction of predicted positives that are correct): 356 / 471 = 0.755839; Recall (fraction of true positives predicted correctly): 356 / 444 = 0.801802; F1 (harmonic mean of precision and recall): 0.778142
-Time for training and evaluation: 1.06 seconds
+Time for training and evaluation: 1.27 seconds

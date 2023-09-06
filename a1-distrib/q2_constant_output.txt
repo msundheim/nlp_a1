@@ -1,0 +1,9 @@
+Namespace(model='PERCEPTRON', feats='UNIGRAM', train_path='data/train.txt', dev_path='data/dev.txt', blind_test_path='data/test-blind.txt', test_output_path='test-blind.output.txt', run_on_test=True)
+6920 / 872 / 1821 train/dev/test examples
+=====Train Accuracy=====
+Accuracy: 6830 / 6920 = 0.986994
+Precision (fraction of predicted positives that are correct): 3571 / 3622 = 0.985919; Recall (fraction of true positives predicted correctly): 3571 / 3610 = 0.989197; F1 (harmonic mean of precision and recall): 0.987555
+=====Dev Accuracy=====
+Accuracy: 664 / 872 = 0.761468
+Precision (fraction of predicted positives that are correct): 349 / 462 = 0.755411; Recall (fraction of true positives predicted correctly): 349 / 444 = 0.786036; F1 (harmonic mean of precision and recall): 0.770419
+Time for training and evaluation: 1.26 seconds
